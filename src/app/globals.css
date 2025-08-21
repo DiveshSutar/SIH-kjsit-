@@ -1,0 +1,128 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 25% 98%; /* Very light, slightly cool off-white */
+    --foreground: 225 15% 20%; /* Dark, slightly cool grey */
+
+    --card: 0 0% 100%; /* White cards */
+    --card-foreground: 225 15% 20%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 225 15% 20%;
+
+    --primary: 250 70% 60%; /* Vibrant violet-blue */
+    --primary-foreground: 0 0% 100%; /* White text on primary */
+
+    --secondary: 240 10% 94%; /* Lighter cool grey, almost off-white */
+    --secondary-foreground: 225 10% 35%;
+
+    --muted: 240 10% 90%; /* Muted cool grey */
+    --muted-foreground: 225 10% 55%; /* Softer foreground for muted text */
+
+    --accent: 30 95% 58%; /* Warm, vibrant orange */
+    --accent-foreground: 0 0% 100%; /* White text on accent */
+
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 240 10% 88%; /* Cool grey border */
+    --input: 240 10% 92%; /* Light cool grey input background */
+    --ring: 250 70% 60%; /* Ring color to match primary */
+
+    --radius: 0.5rem;
+
+    /* Chart colors */
+    --chart-1: 250 70% 60%; /* Primary */
+    --chart-2: 30 95% 58%;  /* Accent */
+    --chart-3: 200 70% 50%; /* Teal */
+    --chart-4: 300 60% 65%; /* Magenta/Pink */
+    --chart-5: 50 80% 55%;  /* Gold/Yellow */
+    
+    /* Sidebar specific colors */
+    --sidebar-background: 220 25% 99%; /* Very light off-white, almost white */
+    --sidebar-foreground: 225 15% 20%;
+    --sidebar-primary: 250 70% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 30 95% 58%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 240 10% 90%;
+    --sidebar-ring: 250 70% 60%;
+  }
+
+  .dark {
+    --background: 225 15% 12%; /* Dark, cool slate grey */
+    --foreground: 220 20% 92%; /* Light grey for text */
+
+    --card: 225 15% 15%;
+    --card-foreground: 220 20% 92%;
+
+    --popover: 225 15% 15%;
+    --popover-foreground: 220 20% 92%;
+
+    --primary: 250 75% 70%; /* Lighter, vibrant violet-blue */
+    --primary-foreground: 250 20% 10%; /* Dark text on lighter primary */
+
+    --secondary: 225 15% 18%; /* Darker grey */
+    --secondary-foreground: 220 15% 85%;
+
+    --muted: 225 15% 22%; /* Muted dark grey */
+    --muted-foreground: 220 15% 65%;
+
+    --accent: 30 100% 65%; /* Brighter orange */
+    --accent-foreground: 30 30% 10%; /* Dark text on accent */
+
+    --destructive: 0 70% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 225 10% 25%;
+    --input: 225 10% 25%;
+    --ring: 250 75% 70%;
+    
+    /* Chart colors for dark mode - same as light, rely on background contrast or slightly adjust if needed */
+    --chart-1: 250 75% 70%; /* Primary (lighter for dark) */
+    --chart-2: 30 100% 65%; /* Accent (brighter for dark) */
+    --chart-3: 200 75% 60%; /* Teal (lighter) */
+    --chart-4: 300 65% 70%; /* Magenta/Pink (lighter) */
+    --chart-5: 50 85% 60%;  /* Gold/Yellow (lighter) */
+
+    /* Sidebar specific colors for dark mode */
+    --sidebar-background: 225 15% 10%; /* Very dark, slightly off-black */
+    --sidebar-foreground: 220 20% 90%;
+    --sidebar-primary: 250 75% 70%;
+    --sidebar-primary-foreground: 250 20% 10%;
+    --sidebar-accent: 30 100% 65%;
+    --sidebar-accent-foreground: 30 30% 10%;
+    --sidebar-border: 225 10% 22%;
+    --sidebar-ring: 250 75% 70%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Add some subtle scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: hsl(var(--background) / 0.5);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted));
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--secondary-foreground) / 0.5);
+}
