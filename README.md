@@ -4,7 +4,8 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=flat&logo=typescript)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18.3.1-blue?style=flat&logo=react)](https://reactjs.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4.1-38B2AC?style=flat&logo=tailwind-css)](https://tailwindcss.com/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Portia AI](https://img.shields.io/badge/Portia-AI?style=flat&logoSize=10px&labelColor=white&link=(https%3A%2F%2Fwww.portialabs.ai%2F
+)](https://www.portialabs.ai/)
 
 A modern, comprehensive hospital management system built with Next.js, TypeScript, and AI-powered features. HealthFirst Connect streamlines hospital operations with intelligent appointment scheduling, patient management, and **AI-powered insurance approval workflows**.
 
@@ -30,7 +31,7 @@ A modern, comprehensive hospital management system built with Next.js, TypeScrip
 - **Smart Appointment Suggestions**: AI recommends optimal appointment times based on availability
 - **Intelligent Chatbot**: AI-powered patient assistance and inquiry handling
 - **Medical Report Analysis**: AI-powered PDF analysis using LangChain and Qdrant for intelligent report interpretation
-- **Insurance Request Processing**: Multi-step AI workflow for insurance approval analysis
+- **Insurance Request Processing**: Portia Multi-step AI workflow for insurance approval analysis
 - **Automated Workflows**: Streamlined hospital operations with AI optimization
 
 ### 🎨 User Experience

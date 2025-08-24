@@ -459,24 +459,5 @@ DEBUG=portia:* npm run dev
 - Easy to replace with database later
 - Suitable for demo and development
 
-## Future Roadmap
-
-### Short Term (1-2 months)
-- Database integration for production deployment
-- Enhanced error handling and recovery
-- Performance monitoring and analytics
-- Additional test coverage
-
-### Medium Term (3-6 months)
-- Multi-tenant support
-- Advanced workflow customization
-- Integration with EMR systems
-- Mobile application support
-
-### Long Term (6+ months)
-- Machine learning model training
-- Advanced analytics and reporting
-- International deployment
-- Enterprise features and support
 
 This development guide provides a comprehensive overview of the project structure, development practices, and key architectural decisions. For specific questions or additional guidance, refer to the other documentation files or contact the development team.
