@@ -80,7 +80,7 @@ export default function InsuranceApprovalComponent({ className }: InsuranceAppro
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<any>(null);
   const [clarifications, setClarifications] = useState<ClarificationQuestion[]>([]);
-  const [currentAnswer, setCurrentAnswer] = useState('');
+  const [clarificationAnswers, setClarificationAnswers] = useState<{[key: string]: string}>({});
   const [error, setError] = useState<string | null>(null);
 
   const handleAnalyze = async () => {
@@ -122,7 +122,8 @@ export default function InsuranceApprovalComponent({ className }: InsuranceAppro
   };
 
   const handleClarification = async (clarificationId: string) => {
-    if (!currentAnswer.trim() || !analysisResult) return;
+    const answer = clarificationAnswers[clarificationId];
+    if (!answer?.trim() || !analysisResult) return;
 
     try {
       const response = await fetch('/api/portia/insurance/clarify', {
@@ -133,7 +134,7 @@ export default function InsuranceApprovalComponent({ className }: InsuranceAppro
         body: JSON.stringify({
           flowId: analysisResult.flowId,
           clarificationId,
-          answer: currentAnswer.trim()
+          answer: answer.trim()
         }),
       });
 
@@ -145,10 +146,16 @@ export default function InsuranceApprovalComponent({ className }: InsuranceAppro
 
       setClarifications(data.clarifications || []);
       setAnalysisResult(data);
-      setCurrentAnswer('');
-
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to submit clarification');
+      
+      // Clear the specific answer
+      setClarificationAnswers(prev => ({
+        ...prev,
+        [clarificationId]: ''
+      }));
+      
+    } catch (error) {
+      console.error('Failed to submit clarification:', error);
+      setError(error instanceof Error ? error.message : 'Failed to handle clarification');
     }
   };
 
@@ -337,7 +344,7 @@ Current Symptoms: Persistent pain, left leg numbness, limited mobility`;
       )}
 
       {/* Clarification Questions */}
-      {clarifications.length > 0 && (
+      {/*{clarifications.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -356,13 +363,16 @@ Current Symptoms: Persistent pain, left leg numbness, limited mobility`;
                   <div className="space-y-2">
                     <Textarea
                       placeholder="Enter your response..."
-                      value={currentAnswer}
-                      onChange={(e) => setCurrentAnswer(e.target.value)}
-                      className="min-h-[80px]"
-                    />
-                    <Button 
+                      value={clarificationAnswers[clarification.id] || ''}
+                      onChange={(e) => setClarificationAnswers(prev => ({
+                        ...prev,
+                        [clarification.id]: e.target.value
+                      }))}
+                      className="min-h-[80px]" */}
+                    {/* />  */}
+                    {/* <Button 
                       onClick={() => handleClarification(clarification.id)}
-                      disabled={!currentAnswer.trim()}
+                      disabled={!clarificationAnswers[clarification.id]?.trim()}
                       size="sm"
                     >
                       <Send className="w-4 h-4 mr-2" />
@@ -380,7 +390,7 @@ Current Symptoms: Persistent pain, left leg numbness, limited mobility`;
             ))}
           </CardContent>
         </Card>
-      )}
+      )} */}
 
       {/* Analysis Results */}
       {analysisResult?.analysis && (
@@ -421,7 +431,7 @@ Current Symptoms: Persistent pain, left leg numbness, limited mobility`;
               <div>
                 <div className="font-medium">Urgency</div>
                 <Badge variant={analysisResult.analysis.requestInfo.urgency === 'emergency' ? 'destructive' : 'secondary'}>
-                  {analysisResult.analysis.requestInfo.urgency.toUpperCase()}
+                  {(analysisResult.analysis.requestInfo.urgency || 'standard').toUpperCase()}
                 </Badge>
               </div>
             </CardContent>
@@ -555,7 +565,7 @@ Current Symptoms: Persistent pain, left leg numbness, limited mobility`;
       )}
 
       {/* Processing Info */}
-      {analysisResult && (
+      {/* {analysisResult && (
         <Card>
           <CardHeader>
             <CardTitle className="text-sm">Processing Information</CardTitle>
@@ -569,7 +579,7 @@ Current Symptoms: Persistent pain, left leg numbness, limited mobility`;
             </div>
           </CardContent>
         </Card>
-      )}
+      )} */}
     </div>
   );
 }

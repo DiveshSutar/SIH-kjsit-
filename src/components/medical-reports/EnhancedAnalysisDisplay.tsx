@@ -225,11 +225,11 @@ export function EnhancedAnalysisDisplay({
                         variant="outline" 
                         className={`text-xs ${getPriorityColor(section.priority)} px-2 py-0.5`}
                       >
-                        <span className="hidden md:inline">{section.priority.toUpperCase()} PRIORITY</span>
-                        <span className="md:hidden">{section.priority.toUpperCase()}</span>
+                        <span className="hidden md:inline">{(section.priority || 'normal').toUpperCase()} PRIORITY</span>
+                        <span className="md:hidden">{(section.priority || 'normal').toUpperCase()}</span>
                       </Badge>
                       <Badge variant="secondary" className="text-xs px-2 py-0.5">
-                        {section.type.toUpperCase()}
+                        {(section.type || 'general').toUpperCase()}
                       </Badge>
                     </div>
                   </div>

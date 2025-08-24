@@ -50,9 +50,36 @@ export interface PortiaInsuranceApprovalFlow {
 export class PortiaInsuranceApprovalWorkflow {
   private agent: PortiaInsuranceApprovalAgent;
   private currentFlow: PortiaInsuranceApprovalFlow | null = null;
+  
+  // Static in-memory store for flows (in production, this should be a database)
+  private static flowStore: Map<string, PortiaInsuranceApprovalFlow> = new Map();
 
   constructor(apiKey?: string) {
     this.agent = new PortiaInsuranceApprovalAgent(apiKey);
+  }
+
+  /**
+   * Save flow to storage
+   */
+  private saveFlow(flow: PortiaInsuranceApprovalFlow): void {
+    console.log(`Saving flow: ${flow.plan.id}`);
+    PortiaInsuranceApprovalWorkflow.flowStore.set(flow.plan.id, flow);
+    this.currentFlow = flow;
+  }
+
+  /**
+   * Load flow from storage
+   */
+  private loadFlow(flowId: string): PortiaInsuranceApprovalFlow | null {
+    console.log(`Loading flow: ${flowId}, Available flows:`, Array.from(PortiaInsuranceApprovalWorkflow.flowStore.keys()));
+    const flow = PortiaInsuranceApprovalWorkflow.flowStore.get(flowId) || null;
+    if (flow) {
+      this.currentFlow = flow;
+      console.log(`Successfully loaded flow: ${flowId}`);
+    } else {
+      console.log(`Flow not found: ${flowId}`);
+    }
+    return flow;
   }
 
   /**
@@ -188,6 +215,7 @@ export class PortiaInsuranceApprovalWorkflow {
         }
       };
 
+      this.saveFlow(this.currentFlow);
       return this.currentFlow;
 
     } catch (error) {
@@ -206,6 +234,7 @@ export class PortiaInsuranceApprovalWorkflow {
         }
       };
 
+      this.saveFlow(this.currentFlow);
       return this.currentFlow;
     }
   }
@@ -218,28 +247,34 @@ export class PortiaInsuranceApprovalWorkflow {
     clarificationId: string,
     answer: string
   ): Promise<PortiaInsuranceApprovalFlow> {
+    // Try to load the flow if not current
     if (!this.currentFlow || this.currentFlow.plan.id !== flowId) {
-      throw new Error('Invalid flow ID or workflow not found');
+      const flow = this.loadFlow(flowId);
+      if (!flow) {
+        throw new Error('Invalid flow ID or workflow not found');
+      }
     }
 
     // Update clarification with answer
-    const clarification = this.currentFlow.clarifications.find(c => c.id === clarificationId);
+    const clarification = this.currentFlow!.clarifications.find(c => c.id === clarificationId);
     if (clarification) {
       clarification.answered = true;
       clarification.answer = answer;
     }
 
     // Check if all clarifications are answered
-    const allAnswered = this.currentFlow.clarifications.every(c => c.answered);
+    const allAnswered = this.currentFlow!.clarifications.every(c => c.answered);
     
-    if (allAnswered && this.currentFlow.finalAnalysis) {
+    if (allAnswered && this.currentFlow!.finalAnalysis) {
       // Re-run analysis with updated information
       const updatedRequestText = this.reconstructRequestWithClarifications();
       const updatedAnalysis = await this.agent.analyzeInsuranceRequest(updatedRequestText);
-      this.currentFlow.finalAnalysis = updatedAnalysis;
+      this.currentFlow!.finalAnalysis = updatedAnalysis;
     }
 
-    return this.currentFlow;
+    // Save the updated flow
+    this.saveFlow(this.currentFlow!);
+    return this.currentFlow!;
   }
 
   /**
@@ -250,11 +285,19 @@ export class PortiaInsuranceApprovalWorkflow {
     providerNotification: string;
     patientNotification: string;
   }> {
-    if (!this.currentFlow || this.currentFlow.plan.id !== flowId || !this.currentFlow.finalAnalysis) {
-      throw new Error('Invalid flow ID or analysis not available');
+    // Try to load the flow if not current
+    if (!this.currentFlow || this.currentFlow.plan.id !== flowId) {
+      const flow = this.loadFlow(flowId);
+      if (!flow) {
+        throw new Error('Invalid flow ID or workflow not found');
+      }
+    }
+    
+    if (!this.currentFlow!.finalAnalysis) {
+      throw new Error('Analysis not available for documentation generation');
     }
 
-    const analysis = this.currentFlow.finalAnalysis;
+    const analysis = this.currentFlow!.finalAnalysis;
     const decision = analysis.decision;
     const requestInfo = analysis.requestInfo;
 
@@ -272,13 +315,13 @@ Policy Number: ${requestInfo.patientInfo.policyNumber}
 
 Requested Service: ${requestInfo.serviceRequested}
 Diagnosis: ${requestInfo.diagnosis}
-Physician: ${requestInfo.physicianInfo.name}
+Physician: ${requestInfo.physicianInfo?.name || 'Not specified'}
 
-DECISION: ${decision.decision.toUpperCase()}
+DECISION: ${(decision.decision || 'pending').toUpperCase()}
 Confidence Level: ${Math.round(decision.confidence * 100)}%
 
 Reasoning:
-${decision.reasoning.map(reason => `• ${reason}`).join('\n')}
+${decision.reasoning?.map(reason => `• ${reason}`).join('\n') || 'No reasoning provided'}
 
 ${decision.conditions ? `Approval Conditions:\n${decision.conditions.map(condition => `• ${condition}`).join('\n')}\n` : ''}
 
@@ -298,10 +341,10 @@ PROVIDER NOTIFICATION - INSURANCE DECISION
 
 Dear ${requestInfo.physicianInfo.name},
 
-Your prior authorization request for ${requestInfo.patientInfo.name} has been ${decision.decision}.
+Your prior authorization request for ${requestInfo.patientInfo?.name || 'Patient'} has been ${decision.decision || 'processed'}.
 
-Service: ${requestInfo.serviceRequested}
-Decision: ${decision.decision.toUpperCase()}
+Service: ${requestInfo.serviceRequested || 'Not specified'}
+Decision: ${(decision.decision || 'pending').toUpperCase()}
 Reference: ${flowId}
 
 Please contact our office for any questions regarding this decision.
