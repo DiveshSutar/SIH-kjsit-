@@ -30,7 +30,7 @@ A modern, comprehensive hospital management system built with Next.js, TypeScrip
 - **Smart Appointment Suggestions**: AI recommends optimal appointment times based on availability
 - **Intelligent Chatbot**: AI-powered patient assistance and inquiry handling
 - **Medical Report Analysis**: AI-powered PDF analysis using LangChain and Qdrant for intelligent report interpretation
-- **Insurance Request Processing**: Multi-step AI workflow for insurance approval analysis
+- **Insurance Request Processing**: Portia Multi-step AI workflow for insurance approval analysis
 - **Automated Workflows**: Streamlined hospital operations with AI optimization
 
 ### 🎨 User Experience
