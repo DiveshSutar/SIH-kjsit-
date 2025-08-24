@@ -6,7 +6,7 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4.1-38B2AC?style=flat&logo=tailwind-css)](https://tailwindcss.com/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-A modern, comprehensive hospital management system built with Next.js, TypeScript, and AI-powered features. HealthFirst Connect streamlines hospital operations with intelligent appointment scheduling and patient management capabilities.
+A modern, comprehensive hospital management system built with Next.js, TypeScript, and AI-powered features. HealthFirst Connect streamlines hospital operations with intelligent appointment scheduling, patient management, and **AI-powered insurance approval workflows**.
 
 ## ✨ Features
 
@@ -17,10 +17,20 @@ A modern, comprehensive hospital management system built with Next.js, TypeScrip
 - **Payment Processing**: Simulated payment system with receipt generation
 - **Real-time Chat**: Interactive chatbot for patient assistance and inquiries
 
+### 🛡️ **NEW: Insurance Approval System**
+- **AI-Powered Insurance Analysis**: Automated analysis of insurance requests using Google Gemini AI
+- **Portia Multi-Agent Workflow**: Intelligent workflow management for complex approval processes
+- **Clarification Handling**: Dynamic question-answer system for incomplete requests
+- **Comprehensive Coverage Database**: 50+ medications with generous approval policies for maximum patient coverage
+- **Detailed Decision Reasoning**: Transparent approval/denial decisions with confidence scores and detailed explanations
+- **Approval Documentation**: Automated generation of approval letters and provider notifications
+- **Workflow Persistence**: Maintains workflow state across sessions for seamless user experience
+
 ### 🤖 AI-Powered Features
 - **Smart Appointment Suggestions**: AI recommends optimal appointment times based on availability
 - **Intelligent Chatbot**: AI-powered patient assistance and inquiry handling
 - **Medical Report Analysis**: AI-powered PDF analysis using LangChain and Qdrant for intelligent report interpretation
+- **Insurance Request Processing**: Multi-step AI workflow for insurance approval analysis
 - **Automated Workflows**: Streamlined hospital operations with AI optimization
 
 ### 🎨 User Experience
@@ -46,8 +56,11 @@ This project consists of three main components:
 
 ### **AI Integration**
 - **Google AI (Gemini 2.0)**: Intelligent appointment scheduling and chatbot functionality
+- **Google Gemini 1.5 Flash**: Advanced insurance approval analysis and reasoning
+- **Portia Framework**: Multi-agent workflow system for complex insurance processes
 - **Genkit Framework**: AI workflow management and prompt engineering
 - **Smart Recommendations**: AI-powered appointment time suggestions
+- **Comprehensive Medication Database**: 50+ medications with intelligent coverage analysis
 
 ## 🚀 Quick Start
 
@@ -84,6 +97,11 @@ This project consists of three main components:
    # For Medical Report Analysis feature
    OPENAI_API_KEY=your_openai_api_key_here
    QDRANT_URL=http://localhost:6333
+   
+   # For Firebase Authentication (Insurance System)
+   FIREBASE_API_KEY=your_firebase_api_key
+   FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
+   FIREBASE_PROJECT_ID=your_firebase_project_id
    ```
 
 4. **Set up Qdrant Vector Database** (for Medical Report Analysis)
@@ -123,6 +141,38 @@ This project consists of three main components:
 5. Complete the simulated payment process
 6. Receive a digital receipt via email
 
+### Using the Insurance Approval System
+1. Navigate to **Insurance Approval** in the main navigation
+2. Enter insurance request details including:
+   - Patient information (name, member ID, policy number)
+   - Service requested and diagnosis
+   - Physician information and clinical justification
+3. Click **Analyze Insurance Request** to start the AI workflow
+4. Monitor the workflow progress through visual step indicators
+5. Review comprehensive analysis including:
+   - Coverage verification and prior authorization requirements
+   - Medical criteria evaluation with detailed reasoning
+   - Approval/denial decision with confidence score
+6. Answer any clarification questions if prompted by the system
+7. Download approval documentation and letters as needed
+
+**Sample Insurance Request Format:**
+```
+Patient Information:
+Name: Sarah Johnson
+Member ID: MEM123456789
+Policy Number: POL987654321
+
+Insurance Request:
+Service Requested: MRI of Lumbar Spine
+Diagnosis: Chronic lower back pain with radiculopathy
+Physician: Dr. Michael Chen, Orthopedic Specialist
+
+Clinical Justification:
+Patient experiencing chronic pain for 8 weeks. Conservative treatment unsuccessful. 
+MRI necessary to rule out disc herniation and plan treatment.
+```
+
 ### Using the Chatbot
 1. Click the **Chat** button in the navigation
 2. Ask questions about hospital services, appointments, or general inquiries
@@ -159,6 +209,8 @@ This project consists of three main components:
 
 ### AI & Data Processing
 - **Google AI (Gemini 2.0)** - Advanced language model for intelligent features
+- **Google Gemini 1.5 Flash** - Insurance approval analysis and decision reasoning
+- **Portia Framework** - Multi-agent workflow system for complex processes
 - **OpenAI GPT** - Medical report analysis and interpretation
 - **LangChain** - AI application development framework
 - **Qdrant** - Vector database for semantic search and retrieval
@@ -175,6 +227,17 @@ This project consists of three main components:
 - **Tailwind Animate** - Animation utilities
 
 ## 🔌 API Endpoints
+
+### Insurance Approval APIs
+- **POST** `/api/portia/insurance/analyze`
+  - Analyze new insurance approval requests
+  - Returns workflow progress, analysis results, and clarification questions
+- **POST** `/api/portia/insurance/clarify`
+  - Submit answers to clarification questions
+  - Updates workflow state and continues analysis
+- **POST** `/api/portia/insurance/generate`
+  - Generate approval documentation and letters
+  - Returns downloadable approval documents
 
 ### Email Services
 - **POST** `/api/send-confirmation-email`
