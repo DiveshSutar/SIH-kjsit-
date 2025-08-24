@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, BriefcaseMedical, CalendarDays, LogIn, LogOut, UserCircle, Menu, Bot, FileText } from "lucide-react"; // Added Bot and FileText
+import { Home, BriefcaseMedical, CalendarDays, LogIn, LogOut, UserCircle, Menu, Bot, FileText, Shield } from "lucide-react"; // Added Bot, FileText, and Shield
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { HealthFirstLogo } from "@/components/shared/icons";
@@ -19,7 +19,8 @@ const navLinks = [
   { href: "/services", labelKey: "services", icon: BriefcaseMedical },
   { href: "/book-appointment", labelKey: "bookAppointment", icon: CalendarDays },
   { href: "/medical-reports", labelKey: "medicalReports", icon: FileText },
-  { href: "/chat", labelKey: "chatbot", icon: Bot }, // Added Chatbot link
+  { href: "/insurance-approval", labelKey: "insuranceApproval", icon: Shield }, // Insurance Approval with Shield icon
+  { href: "/chat", labelKey: "chatbot", icon: Bot }, // Chatbot with Bot icon
 ];
 
 export function Navbar() {

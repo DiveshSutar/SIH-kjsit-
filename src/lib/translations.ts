@@ -5,6 +5,7 @@ export const translations = {
     services: "Services",
     bookAppointment: "Book Appointment", 
     medicalReports: "Medical Reports",
+    insuranceApproval: "Insurance Approval",
     chatbot: "Chatbot",
     login: "Login",
     
@@ -117,6 +118,7 @@ export const translations = {
     services: "सेवाएं",
     bookAppointment: "अपॉइंटमेंट बुक करें",
     medicalReports: "मेडिकल रिपोर्ट्स",
+    insuranceApproval: "बीमा अनुमोदन",
     chatbot: "चैटबॉट", 
     login: "लॉगिन",
     
@@ -229,6 +231,7 @@ export const translations = {
     services: "सेवा",
     bookAppointment: "अपॉइंटमेंट बुक करा",
     medicalReports: "वैद्यकीय अहवाल",
+    insuranceApproval: "विमा मंजुरी",
     chatbot: "चॅटबॉट",
     login: "लॉगिन",
     
