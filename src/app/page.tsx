@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { CheckCircle, BriefcaseMedical, CalendarDays, Users, Award, Stethoscope, FileText, MessageSquare } from 'lucide-react';
+import { CheckCircle, BriefcaseMedical, CalendarDays, Users, Award, Stethoscope, FileText, MessageSquare, VideoIcon } from 'lucide-react';
 import { SERVICES_DATA, APP_NAME, DOCTORS_DATA } from '@/lib/constants';
 import { useTranslation } from '@/hooks/useTranslation';
 
@@ -37,6 +37,9 @@ export default function HomePage() {
             style={{ animationDelay: "0.6s" }}>
             <Button asChild size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground">
               <Link href="/book-appointment">{t('bookAnAppointment')}</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg">
+              <Link href="/video-consultation">Video Consultation</Link>
             </Button>
             <Button asChild variant="outline" size="lg">
               <Link href="/services">{t('exploreServices')}</Link>
@@ -246,6 +249,79 @@ export default function HomePage() {
                     </div>
                     <p className="text-muted-foreground">
                       Powered by Portia AI Framework with Google Gemini for intelligent insurance processing
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Video Consultation Feature */}
+      <section className="w-full py-16 md:py-24">
+        <div className="container px-4 md:px-6">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-headline font-bold mb-4">Secure Video Consultations</h2>
+              <p className="text-lg text-muted-foreground">
+                Meet with your doctor from anywhere through secure, encrypted video calls
+              </p>
+            </div>
+            
+            <Card className="overflow-hidden border-2 border-green-200">
+              <div className="grid md:grid-cols-2">
+                <div className="p-8 space-y-6">
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <div className="bg-green-100 p-2 rounded-lg">
+                        <VideoIcon className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold">Schedule & Join</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Book video appointments with your preferred doctor at convenient times
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-3">
+                      <div className="bg-green-100 p-2 rounded-lg">
+                        <MessageSquare className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold">Explain Your Problem</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Describe your symptoms and concerns when scheduling to help doctors prepare
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-3">
+                      <div className="bg-green-100 p-2 rounded-lg">
+                        <CheckCircle className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold">Secure & Private</h3>
+                        <p className="text-sm text-muted-foreground">
+                          End-to-end encrypted video calls ensuring complete privacy and security
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <Button asChild size="lg" className="w-full bg-green-600 hover:bg-green-700">
+                    <Link href="/video-consultation">Start Video Consultation</Link>
+                  </Button>
+                </div>
+                
+                <div className="bg-gradient-to-br from-green-50 to-emerald-100 p-8 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="bg-green-100 p-6 rounded-full w-24 h-24 mx-auto mb-4 flex items-center justify-center">
+                      <VideoIcon className="h-12 w-12 text-green-600" />
+                    </div>
+                    <p className="text-muted-foreground">
+                      Powered by Jitsi Meet for secure, reliable video conferencing
                     </p>
                   </div>
                 </div>

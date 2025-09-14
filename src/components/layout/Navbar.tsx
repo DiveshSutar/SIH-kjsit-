@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, BriefcaseMedical, CalendarDays, LogIn, LogOut, UserCircle, Menu, Bot, FileText, Shield } from "lucide-react"; // Added Bot, FileText, and Shield
+import { Home, BriefcaseMedical, CalendarDays, LogIn, LogOut, UserCircle, Menu, Bot, FileText, Shield } from "lucide-react"; // Added Bot, FileText, Shield
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { HealthFirstLogo } from "@/components/shared/icons";
