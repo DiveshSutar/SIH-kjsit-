@@ -11,6 +11,8 @@ A modern, comprehensive hospital management system built with Next.js, TypeScrip
 
 **🚀 Latest Update**: Enhanced chatbot with multiline support and intelligent medical responses - Updated September 14, 2025
 
+**🏆 Mumbai AI Hacks Submission**: Complete healthcare management system with AI-powered features
+
 ## ✨ Features
 
 ### 🎯 Core Features
