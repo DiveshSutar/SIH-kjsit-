@@ -119,19 +119,44 @@ export class PortiaMedicalReportAgent {
   private model: any;
   private openai: OpenAI;
   private useOpenAI: boolean;
+  private useOpenRouter: boolean;
 
-  constructor(apiKey?: string, openaiKey?: string) {
+  constructor(apiKey?: string, openaiKey?: string, openrouterKey?: string) {
     // Initialize Google AI (fallback)
     this.genAI = new GoogleGenerativeAI(apiKey || process.env.GOOGLE_API_KEY || '');
     this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     
-    // Initialize OpenAI (primary)
-    this.openai = new OpenAI({
-      apiKey: openaiKey || process.env.OPENAI_API_KEY || '',
-    });
+    // Check for OpenRouter key first (highest priority)
+    const routerKey = openrouterKey || process.env.OPENROUTER_API_KEY;
+    const aiKey = openaiKey || process.env.OPENAI_API_KEY;
     
-    // Use OpenAI if key is available, otherwise fallback to Google
-    this.useOpenAI = !!(openaiKey || process.env.OPENAI_API_KEY);
+    if (routerKey) {
+      // Initialize OpenAI client with OpenRouter settings
+      this.openai = new OpenAI({
+        apiKey: routerKey,
+        baseURL: 'https://openrouter.ai/api/v1',
+        defaultHeaders: {
+          'HTTP-Referer': 'https://healthfirst-connect.vercel.app', // Your site URL
+          'X-Title': 'HealthFirst Connect Medical Analysis', // Your app name
+        },
+      });
+      this.useOpenRouter = true;
+      this.useOpenAI = true; // Using OpenAI-compatible interface through OpenRouter
+    } else if (aiKey) {
+      // Initialize OpenAI (primary fallback)
+      this.openai = new OpenAI({
+        apiKey: aiKey,
+      });
+      this.useOpenRouter = false;
+      this.useOpenAI = true;
+    } else {
+      // Fallback to dummy OpenAI client
+      this.openai = new OpenAI({
+        apiKey: '',
+      });
+      this.useOpenRouter = false;
+      this.useOpenAI = false;
+    }
   }
 
   /**
@@ -176,9 +201,12 @@ export class PortiaMedicalReportAgent {
       let response: string;
       
       if (this.useOpenAI) {
-        processingSteps.push('Using OpenAI GPT-4 for analysis...');
+        const modelName = this.useOpenRouter ? "anthropic/claude-3.5-sonnet" : "gpt-4";
+        const providerName = this.useOpenRouter ? "OpenRouter (Claude 3.5 Sonnet)" : "OpenAI GPT-4";
+        
+        processingSteps.push(`Using ${providerName} for analysis...`);
         const completion = await this.openai.chat.completions.create({
-          model: "gpt-4",
+          model: modelName,
           messages: [
             {
               role: "system",

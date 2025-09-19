@@ -8,13 +8,17 @@ console.log('============================================\n');
 
 // Check API key configuration
 const openaiKey = process.env.OPENAI_API_KEY;
+const openrouterKey = process.env.OPENROUTER_API_KEY;
 const geminiKey = process.env.GOOGLE_API_KEY;
 
 console.log('📋 API Configuration Status:');
 console.log(`OpenAI API Key: ${openaiKey ? '✅ Configured' : '❌ Not configured'}`);
+console.log(`OpenRouter API Key: ${openrouterKey ? '✅ Configured' : '❌ Not configured'}`);
 console.log(`Google Gemini API Key: ${geminiKey ? '✅ Configured' : '❌ Not configured'}`);
 
-if (openaiKey && openaiKey.startsWith('sk-') && openaiKey.length > 20) {
+if (openrouterKey && openrouterKey.startsWith('sk-or-v1-') && openrouterKey.length > 20) {
+  console.log('🎯 Primary AI: OpenRouter (Claude 3.5 Sonnet) - Recommended for medical analysis');
+} else if (openaiKey && openaiKey.startsWith('sk-') && openaiKey.length > 20) {
   console.log('🎯 Primary AI: OpenAI GPT-4 (Recommended)');
 } else if (geminiKey) {
   console.log('🎯 Primary AI: Google Gemini (Fallback)');
@@ -163,13 +167,22 @@ console.log('5. Choose output format (PDF, email, etc.)');
 
 console.log('\n💡 Technical Details:');
 console.log('• Multi-agent AI system using Portia framework');
-console.log('• Supports both OpenAI GPT-4 and Google Gemini');
+console.log('• Supports OpenRouter (Claude 3.5 Sonnet), OpenAI GPT-4, and Google Gemini');
+console.log('• OpenRouter provides access to multiple LLM providers');
 console.log('• Comprehensive medical reference ranges database');
 console.log('• HIPAA-friendly with no data storage');
 console.log('• Rate limiting and security measures built-in');
 
+if (!openrouterKey || !openrouterKey.startsWith('sk-or-v1-')) {
+  console.log('\n⚡ To enable OpenRouter (best for medical analysis):');
+  console.log('1. Get API key: https://openrouter.ai/keys');
+  console.log('2. Set: $env:OPENROUTER_API_KEY="your-actual-openrouter-key"');
+  console.log('3. Restart server: npm run dev');
+  console.log('4. Test with real medical reports for best results');
+}
+
 if (!openaiKey || !openaiKey.startsWith('sk-')) {
-  console.log('\n⚡ To enable OpenAI GPT-4 (more accurate):');
+  console.log('\n⚡ To enable OpenAI GPT-4 (alternative option):');
   console.log('1. Get API key: https://platform.openai.com/api-keys');
   console.log('2. Set: $env:OPENAI_API_KEY="your-actual-openai-key"');
   console.log('3. Restart server: npm run dev');

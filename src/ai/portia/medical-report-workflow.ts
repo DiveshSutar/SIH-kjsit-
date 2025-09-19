@@ -51,8 +51,8 @@ export class PortiaMedicalReportWorkflow {
   private agent: PortiaMedicalReportAgent;
   private currentFlow: PortiaMedicalReportFlow | null = null;
 
-  constructor(apiKey?: string, openaiKey?: string) {
-    this.agent = new PortiaMedicalReportAgent(apiKey, openaiKey);
+  constructor(apiKey?: string, openaiKey?: string, openrouterKey?: string) {
+    this.agent = new PortiaMedicalReportAgent(apiKey, openaiKey, openrouterKey);
   }
 
   /**

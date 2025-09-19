@@ -60,6 +60,8 @@ This project consists of three main components:
 - **API Routes**: Next.js API routes for server-side functionality
 
 ### **AI Integration**
+- **OpenRouter API**: Primary AI provider with access to Claude 3.5 Sonnet, GPT-4, and other models
+- **OpenAI (GPT-4)**: Alternative primary AI provider for intelligent analysis
 - **Google AI (Gemini 2.0)**: Intelligent appointment scheduling and chatbot functionality
 - **Google Gemini 1.5 Flash**: Advanced insurance approval analysis and reasoning
 - **Portia Framework**: Multi-agent workflow system for complex insurance processes

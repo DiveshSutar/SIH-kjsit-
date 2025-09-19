@@ -62,16 +62,17 @@ export async function POST(request: NextRequest) {
     // Get API keys from environment
     const googleApiKey = process.env.GOOGLE_API_KEY || 'AIzaSyD9qs4O_R3CoSOLcbQTAKQXwN8wn1WAmqM';
     const openaiApiKey = process.env.OPENAI_API_KEY;
+    const openrouterApiKey = process.env.OPENROUTER_API_KEY;
     
-    if (!googleApiKey && !openaiApiKey) {
+    if (!googleApiKey && !openaiApiKey && !openrouterApiKey) {
       return NextResponse.json(
         { error: 'AI service is not configured. Please contact administrator.' },
         { status: 500 }
       );
     }
 
-    // Initialize Portia workflow with both API keys
-    const workflow = new PortiaMedicalReportWorkflow(googleApiKey, openaiApiKey);
+    // Initialize Portia workflow with all available API keys
+    const workflow = new PortiaMedicalReportWorkflow(googleApiKey, openaiApiKey, openrouterApiKey);
     
     // Execute the workflow
     const startTime = Date.now();
