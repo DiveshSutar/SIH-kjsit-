@@ -38,7 +38,7 @@ A comprehensive AI-powered medical insurance approval system built with **Portia
 
 ```bash
 # Set your Google Gemini API key
-$env:GOOGLE_API_KEY="AIzaSyD9qs4O_R3CoSOLcbQTAKQXwN8wn1WAmqM"
+$env:GOOGLE_API_KEY="AIzaSyCAznDtRnNLMImRtnzfLaaJ0TDWpB2IwJs"
 ```
 
 ### 3. Start the Application
