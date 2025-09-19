@@ -6,6 +6,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PortiaInsuranceApprovalWorkflow } from '@/ai/portia/insurance-approval-workflow';
 
+// Load environment variables from process.env file for insurance services
+const fs = require('fs');
+const path = require('path');
+
+const envPath = path.join(process.cwd(), 'process.env');
+if (fs.existsSync(envPath)) {
+  const envContent = fs.readFileSync(envPath, 'utf8');
+  envContent.split('\n').forEach((line: string) => {
+    if (line.trim() && !line.startsWith('#')) {
+      const [key, ...values] = line.split('=');
+      if (key && values.length) {
+        process.env[key.trim()] = values.join('=').trim();
+      }
+    }
+  });
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();

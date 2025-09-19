@@ -5,12 +5,14 @@ A comprehensive AI-powered medical insurance approval system built with **Portia
 ## 🎯 Features
 
 ### 🤖 AI-Powered Analysis
+
 - **Portia Multi-Agent Workflow**: Structured approval process with multiple verification steps
 - **Google Gemini Integration**: Advanced natural language processing for medical document analysis
 - **Smart Decision Making**: Confidence-based approval recommendations
 - **Automated Documentation**: Generate approval letters and notifications
 
 ### 📋 Comprehensive Workflow
+
 1. **Parse Insurance Request** - Extract patient and service information
 2. **Verify Coverage Eligibility** - Check policy coverage and requirements
 3. **Analyze Medical Criteria** - Evaluate medical necessity and compliance
@@ -19,6 +21,7 @@ A comprehensive AI-powered medical insurance approval system built with **Portia
 6. **Prepare Notifications** - Generate letters for patients and providers
 
 ### 🔍 Coverage Criteria Database
+
 - **Diagnostic Procedures**: MRI, CT scans, imaging studies
 - **Medications**: Specialty drugs, prior authorization requirements
 - **Surgical Procedures**: Medical necessity validation
@@ -27,16 +30,19 @@ A comprehensive AI-powered medical insurance approval system built with **Portia
 ## 🚀 Quick Start
 
 ### 1. Access the System
+
 - **Home Page**: http://localhost:9002
 - **Insurance Approval**: http://localhost:9002/insurance-approval
 
 ### 2. Required Configuration
+
 ```bash
 # Set your Google Gemini API key
-$env:GOOGLE_API_KEY="AIzaSyCPQ6ZoIW7WtCn6EFcKH-w2FcuglEVT71o"
+$env:GOOGLE_API_KEY="AIzaSyD9qs4O_R3CoSOLcbQTAKQXwN8wn1WAmqM"
 ```
 
 ### 3. Start the Application
+
 ```bash
 npm run dev
 ```
@@ -44,6 +50,7 @@ npm run dev
 ## 📊 How It Works
 
 ### Sample Insurance Request
+
 ```
 Patient Information:
 Name: Sarah Johnson
@@ -58,9 +65,9 @@ Physician: Dr. Michael Chen, Orthopedic Specialist
 NPI: 1234567890
 
 Clinical Justification:
-Patient has been experiencing chronic lower back pain for 8 weeks. 
-Conservative treatment including physical therapy and NSAIDs has been unsuccessful. 
-Patient reports numbness and tingling in left leg consistent with nerve compression. 
+Patient has been experiencing chronic lower back pain for 8 weeks.
+Conservative treatment including physical therapy and NSAIDs has been unsuccessful.
+Patient reports numbness and tingling in left leg consistent with nerve compression.
 MRI is medically necessary to rule out disc herniation and plan appropriate treatment.
 
 Urgency: Routine
@@ -69,6 +76,7 @@ Current Symptoms: Persistent pain, left leg numbness, limited mobility
 ```
 
 ### AI Analysis Output
+
 ```
 🏆 Approval Decision: ✅ APPROVED
 Confidence Level: 85%
@@ -94,18 +102,21 @@ Confidence Level: 85%
 ## 🛠️ Technical Architecture
 
 ### Frontend
+
 - **Next.js 14**: React-based web application
 - **Tailwind CSS**: Modern, responsive UI design
 - **TypeScript**: Type-safe development
 - **Lucide Icons**: Beautiful, consistent iconography
 
 ### Backend
+
 - **Portia AI Framework**: Multi-agent workflow orchestration
 - **Google Gemini 1.5 Flash**: Natural language processing
 - **Next.js API Routes**: RESTful backend services
 - **TypeScript**: End-to-end type safety
 
 ### Database
+
 - **In-Memory**: Insurance coverage criteria and reference data
 - **No Persistent Storage**: HIPAA-friendly, no data retention
 
@@ -129,9 +140,11 @@ src/
 ## 🔄 API Endpoints
 
 ### POST `/api/portia/insurance/analyze`
+
 Analyzes insurance approval requests using Portia workflow.
 
 **Request Body:**
+
 ```json
 {
   "requestText": "insurance request details...",
@@ -140,34 +153,47 @@ Analyzes insurance approval requests using Portia workflow.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
   "flowId": "insurance-approval-1234567890",
   "status": "completed",
   "analysis": {
-    "requestInfo": { /* patient and service details */ },
-    "coverageAnalysis": { /* coverage evaluation */ },
-    "decision": { /* approval decision */ }
+    "requestInfo": {
+      /* patient and service details */
+    },
+    "coverageAnalysis": {
+      /* coverage evaluation */
+    },
+    "decision": {
+      /* approval decision */
+    }
   },
-  "clarifications": [ /* questions if needed */ ]
+  "clarifications": [
+    /* questions if needed */
+  ]
 }
 ```
 
 ### POST `/api/portia/insurance/clarify`
+
 Handles clarification questions during the approval process.
 
 ### POST `/api/portia/insurance/generate`
+
 Generates approval documentation and notification letters.
 
 ## 🧪 Testing
 
 ### Run Complete System Test
+
 ```bash
 node test-insurance-approval.js
 ```
 
 ### Expected Output
+
 ```
 🏥 Testing Insurance Approval System with Portia & Gemini
 ✅ Using Gemini API Key: AIzaSyCPQ6ZoIW7...
@@ -179,12 +205,14 @@ node test-insurance-approval.js
 ## 🎪 Demo Features
 
 ### Interactive Interface
+
 - **Smart Request Parsing**: Automatically extracts key information
 - **Real-time Analysis**: Instant approval decisions with reasoning
 - **Clarification System**: Asks follow-up questions when needed
 - **Documentation Generation**: Downloads approval letters
 
 ### Sample Workflow
+
 1. Enter insurance request details
 2. AI analyzes coverage and medical necessity
 3. System generates approval decision with confidence score
@@ -193,12 +221,14 @@ node test-insurance-approval.js
 ## 🔒 Security & Compliance
 
 ### Data Protection
+
 - **No Data Storage**: Requests processed in memory only
 - **Rate Limiting**: 10 requests per minute per IP
 - **Input Validation**: Secure request processing
 - **Error Handling**: Graceful failure management
 
 ### Medical Compliance
+
 - **HIPAA-Friendly**: No persistent data storage
 - **Audit Trail**: Processing steps logged for transparency
 - **Appeal Rights**: Clear appeal process information
@@ -207,6 +237,7 @@ node test-insurance-approval.js
 ## 🎯 Coverage Criteria
 
 ### Supported Services
+
 - **Diagnostic Imaging**: MRI, CT, X-rays, ultrasounds
 - **Specialty Medications**: Prior authorization required drugs
 - **Surgical Procedures**: Elective and medically necessary surgeries
@@ -214,6 +245,7 @@ node test-insurance-approval.js
 - **Laboratory Tests**: Specialized blood work and diagnostics
 
 ### Approval Factors
+
 - **Medical Necessity**: Evidence-based clinical need
 - **Conservative Treatment**: First-line therapy attempts
 - **Provider Qualifications**: Board certification requirements
@@ -222,18 +254,21 @@ node test-insurance-approval.js
 ## 🌟 Key Benefits
 
 ### For Insurance Companies
+
 - **Automated Processing**: Reduce manual review time
 - **Consistent Decisions**: Standardized approval criteria
 - **Cost Savings**: Efficient workflow management
 - **Audit Trails**: Complete decision documentation
 
 ### For Healthcare Providers
+
 - **Fast Approvals**: Real-time decision processing
 - **Clear Requirements**: Transparent criteria and documentation needs
 - **Appeal Support**: Detailed reasoning for decisions
 - **Integration Ready**: API-first design
 
 ### For Patients
+
 - **Transparency**: Clear explanation of approval decisions
 - **Quick Response**: Automated processing reduces wait times
 - **Appeal Rights**: Clear process for challenging decisions
@@ -252,11 +287,13 @@ node test-insurance-approval.js
 ## 📞 Support
 
 ### Quick Links
+
 - **Live Demo**: http://localhost:9002/insurance-approval
 - **Home Page**: http://localhost:9002
 - **API Documentation**: Available in code comments
 
 ### Technical Support
+
 1. Verify Gemini API key configuration
 2. Check environment variables
 3. Test with sample insurance requests
@@ -273,6 +310,6 @@ node test-insurance-approval.js
 ✅ **Insurance Criteria**: Comprehensive database loaded  
 ✅ **API Routes**: All endpoints functional  
 ✅ **React Interface**: User-friendly approval system  
-✅ **Home Page Integration**: Easy access button added  
+✅ **Home Page Integration**: Easy access button added
 
 🎉 **Ready for production use!**

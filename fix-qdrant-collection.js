@@ -1,5 +1,22 @@
 const { QdrantClient } = require('@qdrant/js-client-rest');
-require('dotenv').config({ path: '.env.local' });
+
+// Load environment variables from process.env file
+const fs = require('fs');
+const path = require('path');
+
+// Read process.env file
+const envPath = path.join(__dirname, 'process.env');
+if (fs.existsSync(envPath)) {
+  const envContent = fs.readFileSync(envPath, 'utf8');
+  envContent.split('\n').forEach(line => {
+    if (line.trim() && !line.startsWith('#')) {
+      const [key, ...values] = line.split('=');
+      if (key && values.length) {
+        process.env[key.trim()] = values.join('=').trim();
+      }
+    }
+  });
+}
 
 const QDRANT_URL = process.env.QDRANT_URL || 'http://localhost:6333';
 const QDRANT_API_KEY = process.env.QDRANT_API_KEY;

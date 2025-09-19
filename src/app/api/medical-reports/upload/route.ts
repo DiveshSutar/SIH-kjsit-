@@ -197,6 +197,54 @@ export async function POST(request: NextRequest) {
         modelName: MEDICAL_REPORTS_CONFIG.EMBEDDING_MODEL,
       });
 
+      // Test embedding generation before processing all documents
+      logActivity('testing_embedding_generation', { sessionId });
+      try {
+        const testText = limitedDocs[0]?.pageContent.substring(0, 100) || "Test medical document";
+        const testEmbedding = await embeddings.embedQuery(testText);
+        
+        if (!testEmbedding || testEmbedding.length === 0) {
+          throw new Error('Embedding generation returned empty vector');
+        }
+        
+        if (testEmbedding.length !== 768) {
+          throw new Error(`Embedding dimension mismatch: expected 768, got ${testEmbedding.length}`);
+        }
+        
+        logActivity('embedding_test_successful', { 
+          sessionId, 
+          dimensions: testEmbedding.length 
+        });
+      } catch (embeddingTestError) {
+        await cleanupTempFile(tempFilePath);
+        
+        if (embeddingTestError instanceof Error && embeddingTestError.message.includes('quota')) {
+          logActivity('quota_exceeded', { sessionId }, 'error');
+          return createErrorResponse(
+            'API quota exceeded. Please check your Google Cloud billing and quota limits for the Generative AI API.',
+            429,
+            'The Google API key has reached its quota limit for embedding requests. Please upgrade your quota or try again later.'
+          );
+        } else if (embeddingTestError instanceof Error && embeddingTestError.message.includes('INVALID_ARGUMENT')) {
+          logActivity('invalid_api_key', { sessionId }, 'error');
+          return createErrorResponse(
+            'Invalid API key. Please check your Google API key configuration.',
+            401,
+            'The Google API key appears to be invalid or disabled.'
+          );
+        } else {
+          logActivity('embedding_generation_failed', { 
+            sessionId, 
+            error: embeddingTestError instanceof Error ? embeddingTestError.message : 'Unknown error'
+          }, 'error');
+          return createErrorResponse(
+            'Failed to generate embeddings. Please check your API configuration.',
+            500,
+            embeddingTestError instanceof Error ? embeddingTestError.message : 'Unknown error'
+          );
+        }
+      }
+
       // Create vector store and add documents
       logActivity('creating_vector_store', { sessionId });
       const vectorStore = new QdrantVectorStore(embeddings, {
@@ -204,11 +252,41 @@ export async function POST(request: NextRequest) {
         collectionName: MEDICAL_REPORTS_CONFIG.COLLECTION_NAME,
       });
 
-      await vectorStore.addDocuments(limitedDocs);
-      logActivity('documents_added_to_vector_store', { 
-        sessionId, 
-        documentsAdded: limitedDocs.length 
-      });
+      try {
+        await vectorStore.addDocuments(limitedDocs);
+        logActivity('documents_added_to_vector_store', { 
+          sessionId, 
+          documentsAdded: limitedDocs.length 
+        });
+      } catch (embeddingError) {
+        if (embeddingError instanceof Error && embeddingError.message.includes('quota')) {
+          logActivity('quota_exceeded', { sessionId }, 'error');
+          await cleanupTempFile(tempFilePath);
+          return createErrorResponse(
+            'API quota exceeded. Please check your Google Cloud billing and quota limits for the Generative AI API.',
+            429,
+            'The Google API key has reached its quota limit for embedding requests. Please upgrade your quota or try again later.'
+          );
+        } else if (embeddingError instanceof Error && embeddingError.message.includes('dimension')) {
+          logActivity('dimension_error', { sessionId }, 'error');
+          await cleanupTempFile(tempFilePath);
+          return createErrorResponse(
+            'Vector dimension error. This usually indicates an API quota or configuration issue.',
+            500,
+            'The embedding generation is not working properly. Please check your API quota and configuration.'
+          );
+        } else if (embeddingError instanceof Error && embeddingError.message.includes('INVALID_ARGUMENT')) {
+          logActivity('invalid_api_key', { sessionId }, 'error');
+          await cleanupTempFile(tempFilePath);
+          return createErrorResponse(
+            'Invalid API key. Please check your Google API key configuration.',
+            401,
+            'The Google API key appears to be invalid or disabled.'
+          );
+        }
+        // Re-throw other errors to be handled by outer catch
+        throw embeddingError;
+      }
 
       // Clean up temporary file
       await cleanupTempFile(tempFilePath);

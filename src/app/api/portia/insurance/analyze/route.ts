@@ -8,6 +8,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PortiaInsuranceApprovalWorkflow } from '@/ai/portia/insurance-approval-workflow';
 
+// Load environment variables from process.env file for insurance services
+const fs = require('fs');
+const path = require('path');
+
+const envPath = path.join(process.cwd(), 'process.env');
+if (fs.existsSync(envPath)) {
+  const envContent = fs.readFileSync(envPath, 'utf8');
+  envContent.split('\n').forEach((line: string) => {
+    if (line.trim() && !line.startsWith('#')) {
+      const [key, ...values] = line.split('=');
+      if (key && values.length) {
+        process.env[key.trim()] = values.join('=').trim();
+      }
+    }
+  });
+}
+
 // Rate limiting setup
 const requestCounts = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
@@ -59,7 +76,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get API key from environment
+    // Get API key from environment (for insurance services - uses general API key)
     const geminiApiKey = process.env.GOOGLE_API_KEY;
     
     console.log('Insurance API - Environment check:');

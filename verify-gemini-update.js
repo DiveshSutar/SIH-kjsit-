@@ -11,7 +11,7 @@ console.log('✅ Environment Variable:');
 console.log(`   GOOGLE_API_KEY: ${envKey ? envKey.substring(0, 15) + '...' : 'Not set'}`);
 
 // Check if the key matches the expected format
-const expectedKeyPrefix = 'AIzaSyCPQ6ZoIW7WtCn6EFcKH-w2FcuglEVT71o';
+const expectedKeyPrefix = 'AIzaSyCIy-Xnmuk1UkLih07w68k9MW8Ah-D1ANk';
 const isCorrectKey = envKey === expectedKeyPrefix;
 
 console.log(`   Status: ${isCorrectKey ? '✅ CORRECT' : '❌ INCORRECT'}`);
@@ -50,7 +50,7 @@ if (isCorrectKey) {
 } else {
   console.log('❌ API Key mismatch detected');
   console.log('🔧 Please ensure the environment variable is set correctly:');
-  console.log('   $env:GOOGLE_API_KEY="AIzaSyCPQ6ZoIW7WtCn6EFcKH-w2FcuglEVT71o"');
+  console.log('   $env:GOOGLE_API_KEY="AIzaSyD9qs4O_R3CoSOLcbQTAKQXwN8wn1WAmqM"');
 }
 
 console.log('\n📝 Test Results from Previous Run:');

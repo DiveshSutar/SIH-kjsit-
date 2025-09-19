@@ -4,6 +4,24 @@
 
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
+// Load environment variables from process.env file
+const fs = require('fs');
+const path = require('path');
+
+// Read process.env file
+const envPath = path.join(__dirname, 'process.env');
+if (fs.existsSync(envPath)) {
+  const envContent = fs.readFileSync(envPath, 'utf8');
+  envContent.split('\n').forEach(line => {
+    if (line.trim() && !line.startsWith('#')) {
+      const [key, ...values] = line.split('=');
+      if (key && values.length) {
+        process.env[key.trim()] = values.join('=').trim();
+      }
+    }
+  });
+}
+
 async function testInsuranceApprovalSystem() {
   console.log('🏥 Testing Insurance Approval System with Portia & Gemini');
   console.log('========================================================\n');

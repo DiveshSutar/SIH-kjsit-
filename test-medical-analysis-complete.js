@@ -154,7 +154,7 @@ async function runCompleteTest() {
   
   console.log('\n🏆 System Status Summary:');
   console.log('========================');
-  console.log('✅ Google Gemini API: Updated and working (AIzaSyCPQ6ZoIW7WtCn6EFcKH-w2FcuglEVT71o)');
+  console.log('✅ Google Gemini API: Updated and working (AIzaSyD9qs4O_R3CoSOLcbQTAKQXwN8wn1WAmqM)');
   console.log('✅ Medical Reference Ranges: Loaded');
   console.log('✅ Portia Workflow: Ready');
   console.log('✅ Patient-Friendly Analysis: Available');

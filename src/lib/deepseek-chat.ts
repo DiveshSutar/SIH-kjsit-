@@ -3,7 +3,7 @@
 
 import { SERVICES_DATA, DOCTORS_DATA, MOCK_TIME_SLOTS, APP_NAME } from '@/lib/constants';
 
-const GEMINI_API_KEY = process.env.GOOGLE_API_KEY || 'AIzaSyCPQ6ZoIW7WtCn6EFcKH-w2FcuglEVT71o';
+const GEMINI_API_KEY = process.env.GOOGLE_API_KEY || 'AIzaSyD9qs4O_R3CoSOLcbQTAKQXwN8wn1WAmqM';
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
 
 export interface ChatMessage {
@@ -311,51 +311,77 @@ export async function chatWithDeepSeek(
   conversationHistory: ChatMessage[] = []
 ): Promise<ChatResponse> {
   try {
-    console.log('DeepSeek API call initiated with message:', userMessage);
+    console.log('Gemini API call initiated with message:', userMessage);
     
-    // Build conversation context
-    const messages: ChatMessage[] = [
-      { role: 'system', content: buildSystemPrompt() },
-      ...conversationHistory.slice(-10), // Keep last 10 messages for context
-      { role: 'user', content: userMessage }
-    ];
+    // Build conversation context for Gemini
+    const systemPrompt = buildSystemPrompt();
+    
+    // Prepare the prompt for Gemini
+    const conversationContext = conversationHistory
+      .slice(-10) // Keep last 10 messages for context
+      .map(msg => `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`)
+      .join('\n');
+    
+    const fullPrompt = `${systemPrompt}
+
+Previous conversation:
+${conversationContext}
+
+User: ${userMessage}
+
+Please provide a helpful response as MediBuddy, the medical assistant:`;
 
     console.log('Request payload:', {
-      model: 'deepseek-chat',
-      messages: messages,
-      max_tokens: 1000,
-      temperature: 0.7,
-      stream: false
+      contents: [{ parts: [{ text: fullPrompt }] }]
     });
 
-    // Call DeepSeek API
-    const response = await fetch(DEEPSEEK_API_URL, {
+    // Call Gemini API
+    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'deepseek-chat',
-        messages: messages,
-        max_tokens: 1000,
-        temperature: 0.7,
-        stream: false
+        contents: [{ parts: [{ text: fullPrompt }] }],
+        generationConfig: {
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 1000,
+        },
+        safetySettings: [
+          {
+            category: "HARM_CATEGORY_HARASSMENT",
+            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+          },
+          {
+            category: "HARM_CATEGORY_HATE_SPEECH",
+            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+          },
+          {
+            category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+          },
+          {
+            category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+          }
+        ]
       }),
     });
 
-    console.log('DeepSeek API response status:', response.status);
+    console.log('Gemini API response status:', response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`DeepSeek API error: ${response.status} - ${errorText}`);
-      throw new Error(`DeepSeek API error: ${response.status} - ${errorText}`);
+      console.error(`Gemini API error: ${response.status} - ${errorText}`);
+      throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
-    console.log('DeepSeek API response data:', data);
+    console.log('Gemini API response data:', data);
     
-    const botResponse = data.choices[0]?.message?.content || 'I apologize, but I\'m having trouble responding right now. Please try again.';
+    const botResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || 'I apologize, but I\'m having trouble responding right now. Please try again.';
 
     // Extract booking intent
     const bookingIntent = extractBookingIntent(userMessage, conversationHistory);
@@ -370,7 +396,7 @@ export async function chatWithDeepSeek(
     };
 
   } catch (error) {
-    console.error('DeepSeek API error, using smart fallback:', error);
+    console.error('Gemini API error, using smart fallback:', error);
     
     // Use smart fallback instead of generic error message
     const smartResponse = getSmartFallbackResponse(userMessage);
