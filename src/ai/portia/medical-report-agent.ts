@@ -12,11 +12,12 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import OpenAI from 'openai';
 
-// Initialize AI clients
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || '');
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || '',
-});
+// API Keys with fallback from reference repository
+const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY || 'AIzaSyD9qs4O_R3CoSOLcbQTAKQXwN8wn1WAmqM';
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+// Note: Global AI clients are initialized in the agent constructor
+// This ensures proper API key handling for each instance
 
 // Medical reference ranges database
 export const MEDICAL_REFERENCE_RANGES = {
@@ -121,17 +122,25 @@ export class PortiaMedicalReportAgent {
   private useOpenAI: boolean;
 
   constructor(apiKey?: string, openaiKey?: string) {
+    // Use provided API key or fallback to environment variable or reference repo key
+    const googleKey = apiKey || process.env.GOOGLE_API_KEY || 'AIzaSyD9qs4O_R3CoSOLcbQTAKQXwN8wn1WAmqM';
+    const openaiApiKey = openaiKey || process.env.OPENAI_API_KEY;
+    
     // Initialize Google AI (fallback)
-    this.genAI = new GoogleGenerativeAI(apiKey || process.env.GOOGLE_API_KEY || '');
+    this.genAI = new GoogleGenerativeAI(googleKey);
     this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     
-    // Initialize OpenAI (primary)
-    this.openai = new OpenAI({
-      apiKey: openaiKey || process.env.OPENAI_API_KEY || '',
-    });
-    
-    // Use OpenAI if key is available, otherwise fallback to Google
-    this.useOpenAI = !!(openaiKey || process.env.OPENAI_API_KEY);
+    // Initialize OpenAI (primary) - only if key is available
+    if (openaiApiKey) {
+      this.openai = new OpenAI({
+        apiKey: openaiApiKey,
+      });
+      this.useOpenAI = true;
+    } else {
+      // Create a dummy OpenAI instance to avoid null checks
+      this.openai = null as any;
+      this.useOpenAI = false;
+    }
   }
 
   /**
@@ -175,7 +184,7 @@ export class PortiaMedicalReportAgent {
       
       let response: string;
       
-      if (this.useOpenAI) {
+      if (this.useOpenAI && this.openai) {
         processingSteps.push('Using OpenAI GPT-4 for analysis...');
         const completion = await this.openai.chat.completions.create({
           model: "gpt-4",
