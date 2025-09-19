@@ -11,11 +11,15 @@
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import OpenAI from 'openai';
+import Groq from 'groq-sdk';
 
 // Initialize AI clients
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || '');
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || '',
+});
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY || '',
 });
 
 // Medical reference ranges database
@@ -118,19 +122,27 @@ export class PortiaMedicalReportAgent {
   private genAI: GoogleGenerativeAI;
   private model: any;
   private openai: OpenAI;
+  private groq: Groq;
+  private useGroq: boolean;
   private useOpenAI: boolean;
 
-  constructor(apiKey?: string, openaiKey?: string) {
+  constructor(apiKey?: string, openaiKey?: string, groqKey?: string) {
     // Initialize Google AI (fallback)
     this.genAI = new GoogleGenerativeAI(apiKey || process.env.GOOGLE_API_KEY || '');
     this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     
-    // Initialize OpenAI (primary)
+    // Initialize OpenAI (secondary)
     this.openai = new OpenAI({
       apiKey: openaiKey || process.env.OPENAI_API_KEY || '',
     });
     
-    // Use OpenAI if key is available, otherwise fallback to Google
+    // Initialize Groq (primary for medical analysis)
+    this.groq = new Groq({
+      apiKey: groqKey || process.env.GROQ_API_KEY || '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',
+    });
+    
+    // Use Groq as primary, fallback to OpenAI, then Google
+    this.useGroq = !!(groqKey || process.env.GROQ_API_KEY || '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');
     this.useOpenAI = !!(openaiKey || process.env.OPENAI_API_KEY);
   }
 
@@ -175,7 +187,26 @@ export class PortiaMedicalReportAgent {
       
       let response: string;
       
-      if (this.useOpenAI) {
+      if (this.useGroq) {
+        processingSteps.push('Using Groq for medical analysis...');
+        const completion = await this.groq.chat.completions.create({
+          model: "mixtral-8x7b-32768",
+          messages: [
+            {
+              role: "system",
+              content: "You are a medical report analysis expert. Extract lab values and patient information from medical reports and return only valid JSON."
+            },
+            {
+              role: "user",
+              content: parsePrompt
+            }
+          ],
+          temperature: 0.1,
+          max_tokens: 2000
+        });
+        
+        response = completion.choices[0]?.message?.content || '';
+      } else if (this.useOpenAI) {
         processingSteps.push('Using OpenAI GPT-4 for analysis...');
         const completion = await this.openai.chat.completions.create({
           model: "gpt-4",
@@ -244,8 +275,8 @@ export class PortiaMedicalReportAgent {
       let referenceRange = null;
       let status: 'normal' | 'high' | 'low' | 'unknown' = 'unknown';
 
-      if (refKey && MEDICAL_REFERENCE_RANGES[refKey]) {
-        const range = MEDICAL_REFERENCE_RANGES[refKey];
+      if (refKey && (MEDICAL_REFERENCE_RANGES as any)[refKey]) {
+        const range = (MEDICAL_REFERENCE_RANGES as any)[refKey];
         
         // Handle gender-specific ranges
         if ('male' in range && 'female' in range) {
@@ -362,7 +393,7 @@ export class PortiaMedicalReportAgent {
       'bilirubin': 'bilirubin'
     };
 
-    return mappings[normalizedName] || null;
+    return (mappings as any)[normalizedName] || null;
   }
 
   /**
@@ -377,8 +408,8 @@ export class PortiaMedicalReportAgent {
     if (!analysis.patientInfo?.gender) {
       const hasGenderSpecificTests = analysis.labValues?.some(lab => {
         const refKey = this.findReferenceKey(lab.name);
-        if (refKey && MEDICAL_REFERENCE_RANGES[refKey]) {
-          const range = MEDICAL_REFERENCE_RANGES[refKey];
+        if (refKey && (MEDICAL_REFERENCE_RANGES as any)[refKey]) {
+          const range = (MEDICAL_REFERENCE_RANGES as any)[refKey];
           return 'male' in range && 'female' in range;
         }
         return false;
@@ -430,9 +461,50 @@ export class PortiaMedicalReportAgent {
 
     let recommendations: string[] = [];
     try {
-      const result = await this.model.generateContent(recommendationsPrompt);
-      const response = result.response.text();
-      recommendations = response.split('\n').filter(line => line.trim().startsWith('•') || line.trim().startsWith('-')).map(line => line.trim().replace(/^[•-]\s*/, ''));
+      let response: string;
+      
+      if (this.useGroq) {
+        const completion = await this.groq.chat.completions.create({
+          model: "mixtral-8x7b-32768",
+          messages: [
+            {
+              role: "system",
+              content: "You are a health wellness expert. Provide general health recommendations based on lab results. Do not provide medical advice."
+            },
+            {
+              role: "user",
+              content: recommendationsPrompt
+            }
+          ],
+          temperature: 0.3,
+          max_tokens: 500
+        });
+        
+        response = completion.choices[0]?.message?.content || '';
+      } else if (this.useOpenAI) {
+        const completion = await this.openai.chat.completions.create({
+          model: "gpt-4",
+          messages: [
+            {
+              role: "system",
+              content: "You are a health wellness expert. Provide general health recommendations based on lab results. Do not provide medical advice."
+            },
+            {
+              role: "user",
+              content: recommendationsPrompt
+            }
+          ],
+          temperature: 0.3,
+          max_tokens: 500
+        });
+        
+        response = completion.choices[0]?.message?.content || '';
+      } else {
+        const result = await this.model.generateContent(recommendationsPrompt);
+        response = result.response.text();
+      }
+      
+      recommendations = response.split('\n').filter((line: string) => line.trim().startsWith('•') || line.trim().startsWith('-')).map((line: string) => line.trim().replace(/^[•-]\s*/, ''));
     } catch (error) {
       recommendations = ['Maintain a balanced diet', 'Exercise regularly', 'Stay hydrated', 'Get adequate sleep'];
     }

@@ -3,6 +3,7 @@
 
 // HARDCODED API KEYS - FOR TESTING ONLY
 const HARDCODED_GOOGLE_API_KEY = 'AIzaSyCIy-Xnmuk1UkLih07w68k9MW8Ah-D1ANk'; // Dedicated for medical reports analysis
+const HARDCODED_GROQ_API_KEY = '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'; // Groq API key for medical analysis
 const HARDCODED_QDRANT_URL = 'https://b898dbbc-9a7e-4aa3-adbd-a6d6434289cb.eu-central-1-0.aws.cloud.qdrant.io';
 const HARDCODED_QDRANT_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIn0.lOjORKpFdPM55ulkCPbboM3QJ6-PsTvrSYyzAewf-UU';
 
@@ -107,6 +108,7 @@ export const getSuccessMessage = (key: SuccessMessage): string => {
 // Hardcoded API configuration
 export const API_CONFIG = {
   GOOGLE_API_KEY: HARDCODED_GOOGLE_API_KEY,
+  GROQ_API_KEY: HARDCODED_GROQ_API_KEY,
   QDRANT_URL: HARDCODED_QDRANT_URL,
   QDRANT_API_KEY: HARDCODED_QDRANT_API_KEY,
 };
