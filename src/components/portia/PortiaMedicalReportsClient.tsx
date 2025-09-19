@@ -445,7 +445,8 @@ Clinical Notes: Follow-up recommended for lipid levels and vitamin D deficiency.
           Portia Medical Report Analysis
         </h1>
         <p className="text-gray-600">
-          AI-powered medical report analysis with step-by-step processing and patient-friendly explanations
+          AI-powered medical report analysis with step-by-step processing and patient-friendly explanations. 
+          Using advanced AI through OpenRouter (Claude 3.5 Sonnet), OpenAI (GPT-4), or Google Gemini for accurate medical analysis.
         </p>
       </div>
 
@@ -541,7 +542,16 @@ Clinical Notes: Follow-up recommended for lipid levels and vitamin D deficiency.
           <CardTitle>✨ Portia Medical Analysis Features</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-3 gap-6">
+            <div>
+              <h4 className="font-semibold mb-2">🤖 AI Technology</h4>
+              <ul className="text-sm text-gray-600 space-y-1">
+                <li>• OpenRouter API (Claude 3.5 Sonnet)</li>
+                <li>• OpenAI GPT-4 integration</li>
+                <li>• Google Gemini fallback</li>
+                <li>• Intelligent failover system</li>
+              </ul>
+            </div>
             <div>
               <h4 className="font-semibold mb-2">🔬 Comprehensive Analysis</h4>
               <ul className="text-sm text-gray-600 space-y-1">

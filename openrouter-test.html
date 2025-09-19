@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenRouter Integration Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; border: 1px solid #bee5eb; }
+        .btn {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn:hover { background: #0056b3; }
+        pre { background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏥 OpenRouter Integration Test</h1>
+        <p>This page tests the OpenRouter API integration for medical report analysis.</p>
+        
+        <div id="status" class="status info">
+            <strong>Testing configuration...</strong>
+        </div>
+
+        <div class="grid">
+            <div>
+                <h3>🔧 Configuration Test</h3>
+                <button class="btn" onclick="testConfiguration()">Test API Configuration</button>
+                <div id="config-result"></div>
+            </div>
+            
+            <div>
+                <h3>🩺 Medical Analysis Demo</h3>
+                <button class="btn" onclick="testMedicalAnalysis()">Test Medical Analysis</button>
+                <div id="analysis-result"></div>
+            </div>
+        </div>
+
+        <div>
+            <h3>📋 Test Sample Medical Report</h3>
+            <textarea id="sample-report" rows="8" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+LABORATORY REPORT
+Patient: Test Patient, Age: 35, Female
+Test Date: 2024-12-19
+
+RESULTS:
+- Hemoglobin: 11.8 g/dL
+- Total Cholesterol: 245 mg/dL
+- Glucose: 98 mg/dL
+- Vitamin D: 22 ng/mL</textarea>
+            <br>
+            <button class="btn" onclick="runFullAnalysis()">Run Full Portia Analysis</button>
+            <div id="full-analysis-result"></div>
+        </div>
+
+        <div>
+            <h3>📊 Results</h3>
+            <pre id="results">Click a test button to see results...</pre>
+        </div>
+    </div>
+
+    <script>
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = `status ${type}`;
+            statusDiv.innerHTML = `<strong>${message}</strong>`;
+        }
+
+        function showResults(data) {
+            document.getElementById('results').textContent = JSON.stringify(data, null, 2);
+        }
+
+        async function testConfiguration() {
+            updateStatus('Testing API configuration...', 'info');
+            try {
+                const response = await fetch('/api/test-openrouter');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    updateStatus('✅ Configuration test passed!', 'success');
+                    document.getElementById('config-result').innerHTML = `
+                        <div class="status success">
+                            <strong>API Status:</strong><br>
+                            OpenRouter: ${data.apiKeys.openrouter.configured ? '✅' : '❌'} (${data.apiKeys.openrouter.format})<br>
+                            OpenAI: ${data.apiKeys.openai.configured ? '✅' : '❌'} (${data.apiKeys.openai.format})<br>
+                            Google: ${data.apiKeys.google.configured ? '✅' : '❌'} (${data.apiKeys.google.format})
+                        </div>
+                    `;
+                } else {
+                    updateStatus('❌ Configuration test failed', 'error');
+                    document.getElementById('config-result').innerHTML = `<div class="status error">Error: ${data.error}</div>`;
+                }
+                showResults(data);
+            } catch (error) {
+                updateStatus('❌ Configuration test failed', 'error');
+                document.getElementById('config-result').innerHTML = `<div class="status error">Network Error: ${error.message}</div>`;
+                showResults({error: error.message});
+            }
+        }
+
+        async function testMedicalAnalysis() {
+            updateStatus('Testing medical analysis endpoint...', 'info');
+            try {
+                const testReport = document.getElementById('sample-report').value;
+                const response = await fetch('/api/portia/medical-report/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        reportText: testReport,
+                        userPreferences: {
+                            explanationLevel: 'simple'
+                        }
+                    })
+                });
+                const data = await response.json();
+                
+                if (response.ok) {
+                    updateStatus('✅ Medical analysis test passed!', 'success');
+                    document.getElementById('analysis-result').innerHTML = `
+                        <div class="status success">
+                            <strong>Analysis Status:</strong> ${data.status}<br>
+                            <strong>Flow ID:</strong> ${data.flowId}<br>
+                            <strong>Processing Time:</strong> ${data.processingTime}
+                        </div>
+                    `;
+                } else {
+                    updateStatus('❌ Medical analysis test failed', 'error');
+                    document.getElementById('analysis-result').innerHTML = `<div class="status error">Error: ${data.error}</div>`;
+                }
+                showResults(data);
+            } catch (error) {
+                updateStatus('❌ Medical analysis test failed', 'error');
+                document.getElementById('analysis-result').innerHTML = `<div class="status error">Network Error: ${error.message}</div>`;
+                showResults({error: error.message});
+            }
+        }
+
+        async function runFullAnalysis() {
+            updateStatus('Running full Portia workflow analysis...', 'info');
+            const startTime = Date.now();
+            
+            try {
+                const testReport = document.getElementById('sample-report').value;
+                const response = await fetch('/api/portia/medical-report/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        reportText: testReport,
+                        userPreferences: {
+                            gender: 'female',
+                            explanationLevel: 'simple'
+                        }
+                    })
+                });
+                const data = await response.json();
+                const duration = Date.now() - startTime;
+                
+                if (response.ok) {
+                    updateStatus(`✅ Full analysis completed in ${duration}ms!`, 'success');
+                    let resultHtml = `<div class="status success">
+                        <strong>Workflow Status:</strong> ${data.status}<br>
+                        <strong>Plan Steps:</strong> ${data.plan.steps.length}<br>
+                        <strong>Clarifications:</strong> ${data.clarifications.length}<br>
+                    `;
+                    
+                    if (data.finalAnalysis) {
+                        resultHtml += `<strong>Final Analysis:</strong> Generated<br>`;
+                        resultHtml += `<strong>Lab Values:</strong> ${data.finalAnalysis.labValuesCount}<br>`;
+                        resultHtml += `<strong>Recommendations:</strong> ${data.finalAnalysis.recommendationsCount}<br>`;
+                    }
+                    
+                    resultHtml += '</div>';
+                    document.getElementById('full-analysis-result').innerHTML = resultHtml;
+                } else {
+                    updateStatus('❌ Full analysis failed', 'error');
+                    document.getElementById('full-analysis-result').innerHTML = `<div class="status error">Error: ${data.error}</div>`;
+                }
+                showResults(data);
+            } catch (error) {
+                updateStatus('❌ Full analysis failed', 'error');
+                document.getElementById('full-analysis-result').innerHTML = `<div class="status error">Network Error: ${error.message}</div>`;
+                showResults({error: error.message});
+            }
+        }
+
+        // Auto-run configuration test on page load
+        window.onload = () => {
+            testConfiguration();
+        };
+    </script>
+</body>
+</html>
