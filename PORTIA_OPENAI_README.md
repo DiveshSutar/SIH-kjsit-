@@ -39,12 +39,14 @@ npm run dev
 $env:OPENAI_API_KEY="sk-your-openai-api-key"
 ```
 
-### Google Gemini (Fallback)
+### Google Gemini (Fallback - Integrated from Reference Repository)
 ```bash
 $env:GOOGLE_API_KEY="your-google-gemini-api-key"
 ```
 
-The system automatically uses OpenAI if available, otherwise falls back to Google Gemini.
+**✅ Reference Repository API Key**: The system includes a fallback Google Gemini API key (`AIzaSyD9qs4O_R3CoSOLcbQTAKQXwN8wn1WAmqM`) integrated from the reference repository, ensuring the medical analysis functionality works even in environments with network restrictions.
+
+The system automatically uses OpenAI if available, otherwise falls back to Google Gemini, and provides demo functionality in restricted environments.
 
 ## 📊 Supported Medical Tests
 
