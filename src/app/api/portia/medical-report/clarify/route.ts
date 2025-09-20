@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get API key from environment
-    const apiKey = process.env.GOOGLE_API_KEY || 'AIzaSyD9qs4O_R3CoSOLcbQTAKQXwN8wn1WAmqM';
+    const apiKey = process.env.GOOGLE_API_KEY || 'AIzaSyD9ubsXUnHT7ReRJ6GIzrWhFTA-lvPfa4g';
     if (!apiKey) {
       return NextResponse.json(
         { error: 'AI service is not configured' },

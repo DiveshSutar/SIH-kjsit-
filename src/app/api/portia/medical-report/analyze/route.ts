@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get API keys from environment
-    const googleApiKey = process.env.GOOGLE_API_KEY || 'AIzaSyD9qs4O_R3CoSOLcbQTAKQXwN8wn1WAmqM';
+    const googleApiKey = process.env.GOOGLE_API_KEY || 'AIzaSyD9ubsXUnHT7ReRJ6GIzrWhFTA-lvPfa4g';
     const openaiApiKey = process.env.OPENAI_API_KEY;
     
     if (!googleApiKey && !openaiApiKey) {
