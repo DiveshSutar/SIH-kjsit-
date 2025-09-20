@@ -9,7 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { PortiaMedicalReportWorkflow } from '@/ai/portia/medical-report-workflow';
 
 // In-memory workflow storage (in production, use Redis or database)
-const activeWorkflows = new Map<string, PortiaMedicalReportWorkflow>();
+const activeWorkflows = new Map<string, any>();
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,27 +23,36 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get API key from environment
-    const apiKey = process.env.GOOGLE_API_KEY || 'AIzaSyD9qs4O_R3CoSOLcbQTAKQXwN8wn1WAmqM';
-    if (!apiKey) {
+    // Get API keys from environment
+    const googleApiKey = process.env.GOOGLE_API_KEY || 'AIzaSyD9qs4O_R3CoSOLcbQTAKQXwN8wn1WAmqM';
+    const openaiApiKey = process.env.OPENAI_API_KEY;
+    
+    if (!googleApiKey) {
       return NextResponse.json(
         { error: 'AI service is not configured' },
         { status: 500 }
       );
     }
 
-    // Get or create workflow instance
-    let workflow = activeWorkflows.get(flowId);
-    if (!workflow) {
-      // In a real implementation, you'd restore the workflow from persistent storage
+    // Get workflow instance from global storage
+    const activeWorkflows = global.activeWorkflows || new Map();
+    let workflowData = activeWorkflows.get(flowId);
+    if (!workflowData) {
       return NextResponse.json(
         { error: 'Workflow not found. Please start a new analysis.' },
         { status: 404 }
       );
     }
 
+    // Create new workflow instance with stored data
+    const workflow = new PortiaMedicalReportWorkflow(googleApiKey, openaiApiKey);
+    workflow.restoreFlow(workflowData);
+
     // Answer the clarification question
     const updatedFlow = await workflow.answerClarification(questionId, answer, userEmail);
+    
+    // Store updated workflow
+    activeWorkflows.set(flowId, updatedFlow);
 
     // Check if workflow is complete
     const status = workflow.getWorkflowStatus();

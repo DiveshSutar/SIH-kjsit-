@@ -402,6 +402,11 @@ export class PortiaMedicalReportWorkflow {
     return this.currentFlow;
   }
 
+  // Restore workflow from stored data
+  restoreFlow(flowData: PortiaMedicalReportFlow): void {
+    this.currentFlow = flowData;
+  }
+
   getWorkflowStatus(): 'planning' | 'executing' | 'waiting_for_clarification' | 'completed' | 'error' {
     if (!this.currentFlow) return 'planning';
     

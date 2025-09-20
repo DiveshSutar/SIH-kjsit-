@@ -10,7 +10,7 @@ import { PortiaMedicalReportWorkflow } from '@/ai/portia/medical-report-workflow
 import { formatAnalysisForDisplay } from '@/ai/portia/medical-report-agent';
 
 // In-memory workflow storage (in production, use Redis or database)
-const activeWorkflows = new Map<string, PortiaMedicalReportWorkflow>();
+const activeWorkflows = global.activeWorkflows || (global.activeWorkflows = new Map());
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,14 +24,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get workflow instance
-    const workflow = activeWorkflows.get(flowId);
-    if (!workflow) {
+    // Get workflow instance from global storage
+    const workflowData = activeWorkflows.get(flowId);
+    if (!workflowData) {
       return NextResponse.json(
         { error: 'Workflow not found. Please start a new analysis.' },
         { status: 404 }
       );
     }
+
+    // Create workflow instance and restore data
+    const googleApiKey = process.env.GOOGLE_API_KEY || 'AIzaSyD9qs4O_R3CoSOLcbQTAKQXwN8wn1WAmqM';
+    const openaiApiKey = process.env.OPENAI_API_KEY;
+    const workflow = new PortiaMedicalReportWorkflow(googleApiKey, openaiApiKey);
+    workflow.restoreFlow(workflowData);
 
     const currentFlow = workflow.getCurrentFlow();
     if (!currentFlow?.finalAnalysis) {
@@ -112,8 +118,13 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const currentFlow = workflow.getCurrentFlow();
-    const status = workflow.getWorkflowStatus();
+    const googleApiKey = process.env.GOOGLE_API_KEY || 'AIzaSyD9qs4O_R3CoSOLcbQTAKQXwN8wn1WAmqM';
+    const openaiApiKey = process.env.OPENAI_API_KEY;
+    const workflowInstance = new PortiaMedicalReportWorkflow(googleApiKey, openaiApiKey);
+    workflowInstance.restoreFlow(workflow);
+
+    const currentFlow = workflowInstance.getCurrentFlow();
+    const status = workflowInstance.getWorkflowStatus();
 
     const response = {
       success: true,

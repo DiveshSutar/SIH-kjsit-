@@ -63,12 +63,16 @@ export async function POST(request: NextRequest) {
     const googleApiKey = process.env.GOOGLE_API_KEY || 'AIzaSyD9qs4O_R3CoSOLcbQTAKQXwN8wn1WAmqM';
     const openaiApiKey = process.env.OPENAI_API_KEY;
     
-    if (!googleApiKey && !openaiApiKey) {
+    // Validate API keys
+    if (!googleApiKey || googleApiKey === '') {
       return NextResponse.json(
-        { error: 'AI service is not configured. Please contact administrator.' },
+        { error: 'Google AI API key is not configured. Please contact administrator.' },
         { status: 500 }
       );
     }
+    
+    console.log('Using Google API Key:', googleApiKey.substring(0, 10) + '...');
+    console.log('OpenAI API Key available:', !!openaiApiKey && openaiApiKey !== 'sk-abcdijkl1234uvwxabcdijkl1234uvwxabcdijkl');
 
     // Initialize Portia workflow with both API keys
     const workflow = new PortiaMedicalReportWorkflow(googleApiKey, openaiApiKey);
@@ -77,6 +81,10 @@ export async function POST(request: NextRequest) {
     const startTime = Date.now();
     const flow = await workflow.executeWorkflow(reportText, userPreferences);
     const processingTime = Date.now() - startTime;
+
+    // Store the workflow for later use
+    const activeWorkflows = global.activeWorkflows || (global.activeWorkflows = new Map());
+    activeWorkflows.set(flow.plan.id, flow);
 
     // Prepare response
     const response = {

@@ -144,6 +144,23 @@ export class PortiaMedicalReportAgent {
   }> {
     const processingSteps = ['Starting report parsing...'];
     
+    // Try AI-powered parsing first, then fallback to regex-based parsing
+    try {
+      return await this.parseWithAI(reportText, processingSteps);
+    } catch (error) {
+      processingSteps.push(`AI parsing failed (${error}), using fallback parser...`);
+      return this.parseWithRegex(reportText, processingSteps);
+    }
+  }
+
+  /**
+   * AI-powered parsing using Google Gemini or OpenAI
+   */
+  private async parseWithAI(reportText: string, processingSteps: string[]): Promise<{
+    patientInfo: PatientInfo;
+    extractedValues: Array<{ name: string; value: string; unit: string }>;
+    processingSteps: string[];
+  }> {
     const parsePrompt = `
     Extract lab values and patient information from this medical report:
 
@@ -170,54 +187,161 @@ export class PortiaMedicalReportAgent {
     Extract only numeric values and their units.
     `;
 
-    try {
-      processingSteps.push('Sending report to AI for parsing...');
+    processingSteps.push('Sending report to AI for parsing...');
+    
+    let response: string;
+    
+    if (this.useOpenAI) {
+      processingSteps.push('Using OpenAI GPT-4 for analysis...');
+      const completion = await this.openai.chat.completions.create({
+        model: "gpt-4",
+        messages: [
+          {
+            role: "system",
+            content: "You are a medical report analysis expert. Extract lab values and patient information from medical reports and return only valid JSON."
+          },
+          {
+            role: "user",
+            content: parsePrompt
+          }
+        ],
+        temperature: 0.1,
+        max_tokens: 2000
+      });
       
-      let response: string;
-      
-      if (this.useOpenAI) {
-        processingSteps.push('Using OpenAI GPT-4 for analysis...');
-        const completion = await this.openai.chat.completions.create({
-          model: "gpt-4",
-          messages: [
-            {
-              role: "system",
-              content: "You are a medical report analysis expert. Extract lab values and patient information from medical reports and return only valid JSON."
-            },
-            {
-              role: "user",
-              content: parsePrompt
-            }
-          ],
-          temperature: 0.1,
-          max_tokens: 2000
-        });
-        
-        response = completion.choices[0]?.message?.content || '';
-      } else {
-        processingSteps.push('Using Google Gemini for analysis...');
-        const result = await this.model.generateContent(parsePrompt);
-        response = result.response.text();
-      }
-      
-      // Extract JSON from response
-      const jsonMatch = response.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        throw new Error('Could not extract JSON from AI response');
-      }
-
-      const parsedData = JSON.parse(jsonMatch[0]);
-      processingSteps.push(`Extracted ${parsedData.labValues?.length || 0} lab values`);
-      
-      return {
-        patientInfo: parsedData.patientInfo || {},
-        extractedValues: parsedData.labValues || [],
-        processingSteps
-      };
-    } catch (error) {
-      processingSteps.push(`Error during parsing: ${error}`);
-      throw new Error(`Failed to parse report: ${error}`);
+      response = completion.choices[0]?.message?.content || '';
+    } else {
+      processingSteps.push('Using Google Gemini for analysis...');
+      const result = await this.model.generateContent(parsePrompt);
+      response = result.response.text();
     }
+    
+    // Extract JSON from response
+    const jsonMatch = response.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error('Could not extract JSON from AI response');
+    }
+
+    const parsedData = JSON.parse(jsonMatch[0]);
+    processingSteps.push(`Extracted ${parsedData.labValues?.length || 0} lab values`);
+    
+    return {
+      patientInfo: parsedData.patientInfo || {},
+      extractedValues: parsedData.labValues || [],
+      processingSteps
+    };
+  }
+
+  /**
+   * Fallback regex-based parsing when AI is not available
+   */
+  private parseWithRegex(reportText: string, processingSteps: string[]): {
+    patientInfo: PatientInfo;
+    extractedValues: Array<{ name: string; value: string; unit: string }>;
+    processingSteps: string[];
+  } {
+    processingSteps.push('Using regex-based parsing...');
+    
+    // Extract patient information
+    const patientInfo: PatientInfo = {};
+    
+    // Extract name
+    const nameMatch = reportText.match(/Patient:?\s*([^,\n]+)/i);
+    if (nameMatch) {
+      patientInfo.name = nameMatch[1].trim();
+    }
+    
+    // Extract age
+    const ageMatch = reportText.match(/Age:?\s*(\d+)/i);
+    if (ageMatch) {
+      patientInfo.age = parseInt(ageMatch[1]);
+    }
+    
+    // Extract gender
+    const genderMatch = reportText.match(/\b(male|female|M|F)\b/i);
+    if (genderMatch) {
+      const g = genderMatch[1].toLowerCase();
+      patientInfo.gender = (g === 'male' || g === 'm') ? 'male' : 'female';
+    }
+    
+    // Extract test date
+    const dateMatch = reportText.match(/(?:Test )?Date:?\s*([0-9-\/]+)/i);
+    if (dateMatch) {
+      patientInfo.testDate = dateMatch[1].trim();
+    }
+    
+    // Extract lab values using comprehensive patterns
+    const extractedValues: Array<{ name: string; value: string; unit: string }> = [];
+    
+    // Common lab value patterns
+    const labPatterns = [
+      // Pattern: "Hemoglobin: 15.2 g/dL"
+      /(?:^|\n|-)?\s*([A-Za-z\s]+):\s*([0-9.]+)\s*([A-Za-z\/μ%×³⁶°]+)/gmi,
+      // Pattern: "- Hemoglobin 15.2 g/dL"
+      /(?:^|\n)-\s*([A-Za-z\s]+)\s+([0-9.]+)\s*([A-Za-z\/μ%×³⁶°]+)/gmi,
+      // Pattern: "Hgb 15.2 g/dL"
+      /\b([A-Za-z]{2,})\s+([0-9.]+)\s*([A-Za-z\/μ%×³⁶°]+)/gmi
+    ];
+    
+    for (const pattern of labPatterns) {
+      let match;
+      while ((match = pattern.exec(reportText)) !== null) {
+        const name = this.standardizeTestName(match[1].trim());
+        const value = match[2].trim();
+        const unit = match[3].trim();
+        
+        // Avoid duplicates
+        if (!extractedValues.find(v => v.name === name)) {
+          extractedValues.push({ name, value, unit });
+        }
+      }
+    }
+    
+    processingSteps.push(`Extracted ${extractedValues.length} lab values using regex patterns`);
+    
+    return {
+      patientInfo,
+      extractedValues,
+      processingSteps
+    };
+  }
+  
+  /**
+   * Standardize test names to match reference ranges
+   */
+  private standardizeTestName(rawName: string): string {
+    const normalized = rawName.toLowerCase().replace(/[^a-z]/g, '');
+    
+    const mappings: { [key: string]: string } = {
+      'hgb': 'hemoglobin',
+      'hemoglobin': 'hemoglobin',
+      'hct': 'hematocrit',
+      'hematocrit': 'hematocrit',
+      'wbc': 'whiteBloodCells',
+      'whitebloodcells': 'whiteBloodCells',
+      'rbc': 'redBloodCells',
+      'redbloodcells': 'redBloodCells',
+      'platelets': 'platelets',
+      'plt': 'platelets',
+      'cholesterol': 'totalCholesterol',
+      'totalcholesterol': 'totalCholesterol',
+      'chol': 'totalCholesterol',
+      'ldl': 'ldlCholesterol',
+      'ldlcholesterol': 'ldlCholesterol',
+      'hdl': 'hdlCholesterol',
+      'hdlcholesterol': 'hdlCholesterol',
+      'triglycerides': 'triglycerides',
+      'glucose': 'glucose',
+      'sugar': 'glucose',
+      'bloodsugar': 'glucose',
+      'sodium': 'sodium',
+      'potassium': 'potassium',
+      'chloride': 'chloride',
+      'bun': 'bun',
+      'creatinine': 'creatinine'
+    };
+    
+    return mappings[normalized] || rawName;
   }
 
   /**
@@ -418,23 +542,50 @@ export class PortiaMedicalReportAgent {
       unknownCount: labValues.filter(l => l.status === 'unknown').length
     };
 
-    // Generate recommendations using AI
-    const recommendationsPrompt = `
-    Based on these lab results, provide 3-5 general health recommendations:
-    
-    Summary: ${summary.normalCount} normal, ${summary.highCount} high, ${summary.lowCount} low values
-    Abnormal values: ${labValues.filter(l => l.status !== 'normal').map(l => `${l.name}: ${l.value} ${l.unit} (${l.status})`).join(', ')}
-    
-    Provide general wellness recommendations (not medical advice) in a bulleted list.
-    `;
-
+    // Generate recommendations using AI (with fallback)
     let recommendations: string[] = [];
     try {
-      const result = await this.model.generateContent(recommendationsPrompt);
-      const response = result.response.text();
-      recommendations = response.split('\n').filter(line => line.trim().startsWith('•') || line.trim().startsWith('-')).map(line => line.trim().replace(/^[•-]\s*/, ''));
+      const recommendationsPrompt = `
+      Based on these lab results, provide 3-5 general health recommendations:
+      
+      Summary: ${summary.normalCount} normal, ${summary.highCount} high, ${summary.lowCount} low values
+      Abnormal values: ${labValues.filter(l => l.status !== 'normal').map(l => `${l.name}: ${l.value} ${l.unit} (${l.status})`).join(', ')}
+      
+      Provide general wellness recommendations (not medical advice) in a bulleted list.
+      `;
+
+      if (this.useOpenAI) {
+        const completion = await this.openai.chat.completions.create({
+          model: "gpt-4",
+          messages: [
+            {
+              role: "system",
+              content: "You are a health and wellness advisor. Provide general health recommendations based on lab results."
+            },
+            {
+              role: "user",
+              content: recommendationsPrompt
+            }
+          ],
+          temperature: 0.7,
+          max_tokens: 500
+        });
+        
+        const response = completion.choices[0]?.message?.content || '';
+        recommendations = response.split('\n').filter(line => line.trim().startsWith('•') || line.trim().startsWith('-')).map(line => line.trim().replace(/^[•-]\s*/, ''));
+      } else {
+        const result = await this.model.generateContent(recommendationsPrompt);
+        const response = result.response.text();
+        recommendations = response.split('\n').filter(line => line.trim().startsWith('•') || line.trim().startsWith('-')).map(line => line.trim().replace(/^[•-]\s*/, ''));
+      }
     } catch (error) {
-      recommendations = ['Maintain a balanced diet', 'Exercise regularly', 'Stay hydrated', 'Get adequate sleep'];
+      // Fallback recommendations based on common lab values
+      recommendations = this.generateFallbackRecommendations(labValues);
+    }
+
+    // Ensure we have at least some recommendations
+    if (recommendations.length === 0) {
+      recommendations = this.generateFallbackRecommendations(labValues);
     }
 
     const disclaimer = "🔒 IMPORTANT DISCLAIMER: This analysis is for educational purposes only and is not medical advice. Please consult with a qualified healthcare professional for proper diagnosis, treatment, and medical guidance. Do not make any medical decisions based solely on this analysis.";
@@ -447,6 +598,41 @@ export class PortiaMedicalReportAgent {
       disclaimer,
       processingSteps: [...processingSteps, 'Final analysis completed']
     };
+  }
+
+  /**
+   * Generate fallback recommendations based on lab values
+   */
+  private generateFallbackRecommendations(labValues: LabValue[]): string[] {
+    const recommendations: string[] = [];
+    const abnormalValues = labValues.filter(l => l.status !== 'normal');
+    
+    // General recommendations
+    recommendations.push('Maintain a balanced, nutritious diet');
+    recommendations.push('Exercise regularly as appropriate for your fitness level');
+    recommendations.push('Stay well-hydrated by drinking adequate water');
+    recommendations.push('Get adequate sleep (7-9 hours per night for adults)');
+    
+    // Specific recommendations based on abnormal values
+    const hasHighCholesterol = abnormalValues.some(v => v.name.includes('cholesterol') && v.status === 'high');
+    if (hasHighCholesterol) {
+      recommendations.push('Consider a heart-healthy diet low in saturated fats');
+    }
+    
+    const hasHighGlucose = abnormalValues.some(v => v.name === 'glucose' && v.status === 'high');
+    if (hasHighGlucose) {
+      recommendations.push('Monitor carbohydrate intake and consider smaller, more frequent meals');
+    }
+    
+    const hasLowHemoglobin = abnormalValues.some(v => v.name === 'hemoglobin' && v.status === 'low');
+    if (hasLowHemoglobin) {
+      recommendations.push('Include iron-rich foods in your diet (with guidance from healthcare provider)');
+    }
+    
+    // Always include the consultation recommendation
+    recommendations.push('Discuss these results with your healthcare provider for personalized advice');
+    
+    return recommendations.slice(0, 5); // Limit to 5 recommendations
   }
 
   /**
