@@ -11,7 +11,7 @@ console.log('✅ Environment Variable:');
 console.log(`   GOOGLE_API_KEY: ${envKey ? envKey.substring(0, 15) + '...' : 'Not set'}`);
 
 // Check if the key matches the expected format
-const expectedKeyPrefix = 'AIzaSyCIy-Xnmuk1UkLih07w68k9MW8Ah-D1ANk';
+const expectedKeyPrefix = 'AIzaSyBlQhpK1WUNFsXMHzI7dsIloVSJeIyTTEIk';
 const isCorrectKey = envKey === expectedKeyPrefix;
 
 console.log(`   Status: ${isCorrectKey ? '✅ CORRECT' : '❌ INCORRECT'}`);
