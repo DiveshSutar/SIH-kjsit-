@@ -2,7 +2,7 @@
 // Production-ready configuration for the AI-powered medical reports analysis
 
 // HARDCODED API KEYS - FOR TESTING ONLY
-const HARDCODED_GOOGLE_API_KEY = 'AIzaSyD9ubsXUnHT7ReRJ6GIzrWhFTA-lvPfa4g'; // Dedicated for medical reports analysis
+const HARDCODED_GOOGLE_API_KEY = 'AIzaSyBlQhpK1WUNFsXMHzI7dsIloVSJeIyTTEI'; // Dedicated for medical reports analysis
 const HARDCODED_QDRANT_URL = 'https://b898dbbc-9a7e-4aa3-adbd-a6d6434289cb.eu-central-1-0.aws.cloud.qdrant.io';
 const HARDCODED_QDRANT_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIn0.lOjORKpFdPM55ulkCPbboM3QJ6-PsTvrSYyzAewf-UU';
 
