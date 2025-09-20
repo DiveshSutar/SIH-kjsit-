@@ -9,9 +9,7 @@
 
 A modern, comprehensive hospital management system built with Next.js, TypeScript, and AI-powered features. HealthFirst Connect streamlines hospital operations with intelligent appointment scheduling, patient management, and **AI-powered insurance approval workflows**.
 
-**🚀 Latest Update**: Enhanced chatbot with multiline support and intelligent medical responses - Updated September 14, 2025
 
-**🏆 Mumbai AI Hacks Submission**: Complete healthcare management system with AI-powered features
 
 ## ✨ Features
 
