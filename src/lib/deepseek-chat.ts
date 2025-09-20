@@ -3,7 +3,7 @@
 
 import { SERVICES_DATA, DOCTORS_DATA, MOCK_TIME_SLOTS, APP_NAME } from '@/lib/constants';
 
-const GEMINI_API_KEY = process.env.GOOGLE_API_KEY || 'AIzaSyAK__-2k3O9rnRCMesCNpqPI6ovaVd8T-c';
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyAK__-2k3O9rnRCMesCNpqPI6ovaVd8T-c';
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
 
 export interface ChatMessage {
